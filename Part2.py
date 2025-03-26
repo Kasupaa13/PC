@@ -98,7 +98,7 @@ def parallel_matvec(N, comm, rank, size):
 
         # For timing the serial matvec
         time_start_serial = timeit.default_timer()
-        np.dot(A,x) # TODO: change between numpy and our own implementation
+        serial_dot(A,x) # TODO: change between numpy and our own implementation
         time_serial = timeit.default_timer() - time_start_serial
 
         # Start timer for parallel matvec
