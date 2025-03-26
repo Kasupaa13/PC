@@ -120,7 +120,9 @@ def parallel_matvec(N, comm, rank, size):
 
     # Compute parallel scalar product
     local_result = serial_dot(local_A, local_x)
-    result = butterfly_sum(local_result)
+    # result = butterfly_sum(local_result) # TODO: butterfly or Allreduce
+    result = np.empty(N, np.float64)
+    comm.Allreduce(result, local_result, op=MPI.SUM)
     return result, time_begin, time_serial
 
 
@@ -154,8 +156,10 @@ if __name__ == "__main__":
             par_times.append(timeit.default_timer() - time_begin)
             ser_times.append(time_serial)
     if rank == 0:
+        # for Roos
         for en, speedup in zip(N_list, np.array(ser_times)/np.array(par_times)):
             print(en, speedup)
+
         # plt.plot(N_list, np.array(ser_times)/np.array(par_times))
         # plt.xlabel("N")
         # plt.ylabel("Speed-up")
