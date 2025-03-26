@@ -120,9 +120,9 @@ def parallel_matvec(N, comm, rank, size):
 
     # Compute parallel scalar product
     local_result = np.dot(local_A, local_x)
-    # result = butterfly_sum(local_result) # TODO: butterfly or Allreduce
-    result = np.empty(N, np.float64)
-    comm.Allreduce(result, local_result, op=MPI.SUM)
+    result = butterfly_sum(local_result) # TODO: butterfly or Allreduce
+    # result = np.empty(N, np.float64)
+    # comm.Allreduce(result, local_result, op=MPI.SUM)
     return result, time_begin, time_serial
 
 
