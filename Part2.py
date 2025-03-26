@@ -144,7 +144,7 @@ if __name__ == "__main__":
     #         file.write(f"{str(size)} {str(time_serial/(timeit.default_timer()-time_begin))}\n")
 
     # Strong scaling
-    N_list = [2**x for x in range(int(np.log2(size)), int(np.log2(size) + 16))] # TODO: input
+    N_list = [2**x for x in range(int(np.log2(size)), int(np.log2(size) + 10))] # TODO: input
     if rank == 0:
         par_times = []
         ser_times = []
