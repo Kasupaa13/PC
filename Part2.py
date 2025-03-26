@@ -98,7 +98,7 @@ def parallel_matvec(N, comm, rank, size):
 
         # For timing the serial matvec
         time_start_serial = timeit.default_timer()
-        np.dot(A,x) # TODO: change between numpy and our own implementation
+        serial_dot(A,x) # TODO: change between numpy and our own implementation
         time_serial = timeit.default_timer() - time_start_serial
 
         # Start timer for parallel matvec
@@ -119,7 +119,7 @@ def parallel_matvec(N, comm, rank, size):
     comm.Scatter(send_A, local_A, root=0)
 
     # Compute parallel scalar product
-    local_result = np.dot(local_A, local_x)
+    local_result = serial_dot(local_A, local_x)
     # result = butterfly_sum(local_result) # TODO: butterfly or Allreduce
     result = np.empty(N, np.float64)
     comm.Allreduce(result, local_result, op=MPI.SUM)
