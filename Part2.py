@@ -130,7 +130,11 @@ if __name__ == "__main__":
     size = comm.Get_size()
 
     # Define vector size (must be divisible by size for simplicity)
-    N = 32  # Total number of elements (we assume it is of the form 2**x)
+    if rank == 0:
+        N = int(input("Enter N:"))  # Total number of elements (we assume it is of the form 2**x)
+    else:
+        N = None
+    N = comm.bcast(N, root=0)
     result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
     # print(f"Rank {rank} returns {result}")
     if rank == 0:
