@@ -131,39 +131,39 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # # Define vector size (must be divisible by size for simplicity)
-    # if rank == 0:
-    #     N = int(input("Enter N:"))  # Total number of elements (we assume it is of the form 2**x)
-    # else:
-    #     N = None
-    # N = comm.bcast(N, root=0)
-    # result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
-    # # print(f"Rank {rank} returns {result}")
-    # if rank == 0:
-    #     # print(f"Final result is {result}")
-    #     # plot_butterfly_sum()
-    #     with open("output.txt", "a") as file:
-    #         file.write(f"{str(size)} {str(time_serial/(timeit.default_timer()-time_begin))}\n")
-
-    # Strong scaling
-    N_list = [2**x for x in range(int(np.log2(size)), int(np.log2(size) + 10))] # TODO: input
+    # Define vector size (must be divisible by size for simplicity)
     if rank == 0:
-        par_times = []
-        ser_times = []
-    for N in N_list:
-        result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
-        if rank == 0:
-            par_times.append(timeit.default_timer() - time_begin)
-            ser_times.append(time_serial)
+        N = int(input("Enter N:"))  # Total number of elements (we assume it is of the form 2**x)
+    else:
+        N = None
+    N = comm.bcast(N, root=0)
+    result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
+    # print(f"Rank {rank} returns {result}")
     if rank == 0:
-        # for Roos
-        for en, speedup in zip(N_list, np.array(ser_times)/np.array(par_times)):
-            print(en, speedup)
+        # print(f"Final result is {result}")
+        # plot_butterfly_sum()
+        with open("output.txt", "a") as file:
+            file.write(f"{str(size)} {str(time_serial/(timeit.default_timer()-time_begin))}\n")
 
-        # plt.plot(N_list, np.array(ser_times)/np.array(par_times))
-        # plt.xlabel("N")
-        # plt.ylabel("Speed-up")
-        # plt.show()
+    # # Strong scaling
+    # N_list = [2**x for x in range(int(np.log2(size)), int(np.log2(size) + 10))] # TODO: input
+    # if rank == 0:
+    #     par_times = []
+    #     ser_times = []
+    # for N in N_list:
+    #     result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
+    #     if rank == 0:
+    #         par_times.append(timeit.default_timer() - time_begin)
+    #         ser_times.append(time_serial)
+    # if rank == 0:
+    #     # # for Roos
+    #     # for en, speedup in zip(N_list, np.array(ser_times)/np.array(par_times)):
+    #     #     print(en, speedup)
+
+    #     plt.plot(N_list, np.array(ser_times)/np.array(par_times))
+    #     plt.xlabel("N")
+    #     plt.ylabel("Speed-up")
+    #     plt.show()
 
     MPI.Finalize()
 
