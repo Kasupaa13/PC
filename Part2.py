@@ -98,7 +98,7 @@ def parallel_matvec(N, comm, rank, size):
 
         # For timing the serial matvec
         time_start_serial = timeit.default_timer()
-        np.dot(A,x) # TODO: change between numpy and our own implementation
+        serial_dot(A,x) # TODO: change between numpy and our own implementation
         time_serial = timeit.default_timer() - time_start_serial
 
         # Start timer for parallel matvec
@@ -119,7 +119,7 @@ def parallel_matvec(N, comm, rank, size):
     comm.Scatter(send_A, local_A, root=0)
 
     # Compute parallel scalar product
-    local_result = np.dot(local_A, local_x)
+    local_result = serial_dot(local_A, local_x)
     result = butterfly_sum(local_result) # TODO: butterfly or Allreduce
     # result = np.empty(N, np.float64)
     # comm.Allreduce(result, local_result, op=MPI.SUM)
@@ -131,42 +131,40 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # # Define vector size (must be divisible by size for simplicity)
+    # Define vector size (must be divisible by size for simplicity)
     # if rank == 0:
     #     N = int(input("Enter N:"))  # Total number of elements (we assume it is of the form 2**x)
     # else:
     #     N = None
     # N = comm.bcast(N, root=0)
-    # result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
-    # # print(f"Rank {rank} returns {result}")
+    N = 2**8
+    result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
+    # print(f"Rank {rank} returns {result}")
+    if rank == 0:
+        # print(f"Final result is {result}")
+        # plot_butterfly_sum()
+        with open("output.txt", "a") as file:
+            file.write(f"{str(size)} {str(time_serial/(timeit.default_timer()-time_begin))}\n")
+
+    # # Strong scaling
+    # N = 2**8
+    # # N_list = [2**x for x in range(int(np.log2(size)), int(np.log2(size) + 10))] # TODO: input
     # if rank == 0:
-    #     # print(f"Final result is {result}")
-    #     # plot_butterfly_sum()
-    #     with open("output.txt", "a") as file:
-    #         file.write(f"{str(size)} {str(time_serial/(timeit.default_timer()-time_begin))}\n")
+    #     par_times = []
+    #     ser_times = []
+    # for N in N_list:
+    #     result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
+    #     if rank == 0:
+    #         par_times.append(timeit.default_timer() - time_begin)
+    #         ser_times.append(time_serial)
+    # if rank == 0:
+    #     # for Roos
+    #     for en, speedup in zip(N_list, np.array(ser_times)/np.array(par_times)):
+    #         print(en, speedup)
 
-    # Strong scaling
-    N_list = [2**x for x in range(int(np.log2(size)), int(np.log2(size) + 10))] # TODO: input
-    if rank == 0:
-        par_times = []
-        ser_times = []
-    for N in N_list:
-        result, time_begin, time_serial = parallel_matvec(N, comm, rank, size)
-        if rank == 0:
-            par_times.append(timeit.default_timer() - time_begin)
-            ser_times.append(time_serial)
-    if rank == 0:
-        # for Roos
-        for en, speedup in zip(N_list, np.array(ser_times)/np.array(par_times)):
-            print(en, speedup)
-
-        # plt.plot(N_list, np.array(ser_times)/np.array(par_times))
-        # plt.xlabel("N")
-        # plt.ylabel("Speed-up")
-        # plt.show()
+    #     # plt.plot(N_list, np.array(ser_times)/np.array(par_times))
+    #     # plt.xlabel("N")
+    #     # plt.ylabel("Speed-up")
+    #     # plt.show()
 
     MPI.Finalize()
-
-    #TODO: How to test weak scaling? Bc we increase N exponentially, and we cannot do that with num of processes.
-    #TODO: What expected of sketching algorithm?
-    #TODO: I related to drawing. Is that what was meant?
